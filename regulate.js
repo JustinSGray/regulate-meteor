@@ -18,10 +18,11 @@ if (this.jQuery === undefined) {
   this.jQuery = {};
 }
 
-(function(root, _, $) {
+(function (root, _, $) {
   "use strict";
 
-  var config, Rules, Messages, Form, Regulate, Translations, messagesCore, messages_en, helpers;
+  var config, Rules, Messages, Form, Regulate, Translations, messagesCore,
+    messages_en, helpers;
 
   /*
    * @private
@@ -41,7 +42,7 @@ if (this.jQuery === undefined) {
      * Returns a human readable conversion of the supplied bytes.
      * Thanks to thomasR @thomasethajar.
      */
-    niceBytes: function(bytes) {
+    niceBytes: function (bytes) {
       var i, sizes = ['bytes', 'KB', 'MB', 'GB', 'TB'];
       if (bytes === 0) {
         return '0 bytes';
@@ -60,28 +61,28 @@ if (this.jQuery === undefined) {
    */
   Rules = {
 
-    max_length: function(str, rule) {
+    max_length: function (str, rule) {
       return rule.max_length ? (str.length <= rule.max_length) : false;
     },
 
-    min_length: function(str, rule) {
+    min_length: function (str, rule) {
       return rule.min_length ? (str.length >= rule.min_length) : false;
     },
 
-    exact_length: function(str, rule) {
+    exact_length: function (str, rule) {
       return rule.exact_length ? (str.length === rule.exact_length) : false;
     },
 
-    email: function(str) {
+    email: function (str) {
       var re = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
       return re.test(str);
     },
 
-    match_field: function(fieldValue, fieldReqs, fields) {
+    match_field: function (fieldValue, fieldReqs, fields) {
       var targetField, result = false;
       if (fieldReqs.match_field) {
         targetField = fieldReqs.match_field;
-        _.each(fields, function(field) {
+        _.each(fields, function (field) {
           if (field.name === targetField) {
             result = field.value === fieldValue;
           }
@@ -90,74 +91,75 @@ if (this.jQuery === undefined) {
       return result;
     },
 
-    min_count: function(fieldName, fieldReqs, fields) {
+    min_count: function (fieldName, fieldReqs, fields) {
       if (!fieldReqs[fieldName]) {
         return false;
       }
 
-      var items = _.filter(fields, function(field) {
+      var items = _.filter(fields, function (field) {
         return field.name === fieldReqs.name;
       });
 
       return items.length >= fieldReqs[fieldName];
     },
 
-    max_count: function(fieldName, fieldReqs, fields) {
+    max_count: function (fieldName, fieldReqs, fields) {
       if (!fieldReqs[fieldName]) {
         return false;
       }
 
-      var items = _.filter(fields, function(field) {
+      var items = _.filter(fields, function (field) {
         return field.name === fieldReqs.name;
       });
 
       return items.length <= fieldReqs[fieldName];
     },
 
-    exact_count: function(fieldName, fieldReqs, fields) {
+    exact_count: function (fieldName, fieldReqs, fields) {
       if (!fieldReqs[fieldName]) {
         return false;
       }
 
-      var items = _.filter(fields, function(field) {
+      var items = _.filter(fields, function (field) {
         return field.name === fieldReqs.name;
       });
 
       return items.length === fieldReqs[fieldName];
     },
 
-    min_checked: function(fieldValue, fieldReqs, fields) {
+    min_checked: function (fieldValue, fieldReqs, fields) {
       return this.min_count('min_checked', fieldReqs, fields);
     },
 
-    exact_checked: function(fieldValue, fieldReqs, fields) {
+    exact_checked: function (fieldValue, fieldReqs, fields) {
       return this.exact_count('exact_checked', fieldReqs, fields);
     },
 
-    max_checked: function(fieldValue, fieldReqs, fields) {
+    max_checked: function (fieldValue, fieldReqs, fields) {
       return this.max_count('max_checked', fieldReqs, fields);
     },
 
-    min_selected: function(fieldValue, fieldReqs, fields) {
+    min_selected: function (fieldValue, fieldReqs, fields) {
       return this.min_count('min_selected', fieldReqs, fields);
     },
 
-    exact_selected: function(fieldValue, fieldReqs, fields) {
+    exact_selected: function (fieldValue, fieldReqs, fields) {
       return this.exact_count('exact_selected', fieldReqs, fields);
     },
 
-    max_selected: function(fieldValue, fieldReqs, fields) {
+    max_selected: function (fieldValue, fieldReqs, fields) {
       return this.max_count('max_selected', fieldReqs, fields);
     },
 
-    max_size: function(fieldValue, fieldReqs) {
+    max_size: function (fieldValue, fieldReqs) {
       return fieldValue <= fieldReqs.max_size;
     },
 
-    accepted_files: function(fieldValue, fieldReqs, fields) {
-      var i, fieldObj, uploadedFileType, acceptedFiles = fieldReqs.accepted_files;
+    accepted_files: function (fieldValue, fieldReqs, fields) {
+      var i, fieldObj, uploadedFileType,
+        acceptedFiles = fieldReqs.accepted_files;
 
-      fieldObj = _.filter(fields, function(field) {
+      fieldObj = _.filter(fields, function (field) {
         return field.name === fieldReqs.name;
       });
 
@@ -185,18 +187,18 @@ if (this.jQuery === undefined) {
    * The following messages in english are used by default.
    */
   messages_en = {
-    required: function(fieldName, fieldReqs) {
+    required: function (fieldName, fieldReqs) {
       var lastChar, verb;
       lastChar = fieldName.charAt(fieldName.length - 1);
       verb = (lastChar === 's') ? 'are' : 'is';
       return fieldName + " " + verb + " required.";
     },
 
-    email: function(fieldName, fieldReqs) {
+    email: function (fieldName, fieldReqs) {
       return fieldName + " must be a valid email.";
     },
 
-    match_field: function(fieldName, fieldReqs, formReqs) {
+    match_field: function (fieldName, fieldReqs, formReqs) {
       var matchName, displayName, matchField;
       matchField = fieldReqs.match_field;
       matchName = formReqs[matchField].display_as || matchField;
@@ -204,22 +206,22 @@ if (this.jQuery === undefined) {
       return displayName + " must match " + matchName;
     },
 
-    max_length: function(fieldName, fieldReqs) {
+    max_length: function (fieldName, fieldReqs) {
       var maxLength = fieldReqs.max_length;
       return fieldName + " must have a maximum length of " + maxLength + ".";
     },
 
-    min_length: function(fieldName, fieldReqs) {
+    min_length: function (fieldName, fieldReqs) {
       var minLength = fieldReqs.min_length;
       return fieldName + " must have a minimum length of " + minLength + ".";
     },
 
-    exact_length: function(fieldName, fieldReqs) {
+    exact_length: function (fieldName, fieldReqs) {
       var exactLength = fieldReqs.exact_length;
       return fieldName + " must have an exact length of " + exactLength + ".";
     },
 
-    min_checked: function(fieldName, fieldReqs) {
+    min_checked: function (fieldName, fieldReqs) {
       var reqValue, message;
       reqValue = fieldReqs.min_checked;
       message = "Check atleast " + reqValue + " checkbox";
@@ -227,7 +229,7 @@ if (this.jQuery === undefined) {
       return message;
     },
 
-    max_checked: function(fieldName, fieldReqs) {
+    max_checked: function (fieldName, fieldReqs) {
       var reqValue, message;
       reqValue = fieldReqs.max_checked;
       message = "Check a maximum of " + reqValue + " checkbox";
@@ -235,7 +237,7 @@ if (this.jQuery === undefined) {
       return message;
     },
 
-    exact_checked: function(fieldName, fieldReqs) {
+    exact_checked: function (fieldName, fieldReqs) {
       var reqValue, message;
       reqValue = fieldReqs.exact_checked;
       message = "Check exactly " + reqValue + " checkbox";
@@ -243,7 +245,7 @@ if (this.jQuery === undefined) {
       return message;
     },
 
-    min_selected: function(fieldName, fieldReqs) {
+    min_selected: function (fieldName, fieldReqs) {
       var reqValue, message;
       reqValue = fieldReqs.min_selected;
       message = "Select atleast " + reqValue + " option";
@@ -251,7 +253,7 @@ if (this.jQuery === undefined) {
       return message;
     },
 
-    max_selected: function(fieldName, fieldReqs) {
+    max_selected: function (fieldName, fieldReqs) {
       var reqValue, message;
       reqValue = fieldReqs.max_selected;
       message = "Select a maximum of " + reqValue + " option";
@@ -259,7 +261,7 @@ if (this.jQuery === undefined) {
       return message;
     },
 
-    exact_selected: function(fieldName, fieldReqs) {
+    exact_selected: function (fieldName, fieldReqs) {
       var reqValue, message;
       reqValue = fieldReqs.exact_selected;
       message = "Select exactly " + reqValue + " option";
@@ -267,14 +269,14 @@ if (this.jQuery === undefined) {
       return message;
     },
 
-    max_size: function(fieldName, fieldReqs) {
+    max_size: function (fieldName, fieldReqs) {
       var reqValue, message;
       reqValue = fieldReqs.max_size;
       message = "File cannot be larger than " + helpers.niceBytes(reqValue) + ".";
       return message;
     },
 
-    accepted_files: function(fieldName, fieldReqs) {
+    accepted_files: function (fieldName, fieldReqs) {
       var acceptedTypes = fieldReqs.accepted_files.split('|'),
         message = "Not a valid file type. ";
       if (acceptedTypes.length > 1) {
@@ -314,7 +316,7 @@ if (this.jQuery === undefined) {
    * @constructor
    * Represents a form with validation requirements.
    */
-  Form = function(name, requirements) {
+  Form = function (name, requirements) {
     this.name = name;
     this.cb = undefined;
     this.errorElems = {};
@@ -327,10 +329,10 @@ if (this.jQuery === undefined) {
    * @private
    * Displays the error messages in the supplied DOM elements.
    */
-  Form.prototype.displayErrors = function(errors) {
+  Form.prototype.displayErrors = function (errors) {
     var self = this;
 
-    _.each(errors, function(errorMsgs, errorName) {
+    _.each(errors, function (errorMsgs, errorName) {
       var i, ul, errorElem;
 
       errorElem = self.errorElems[errorName] || '';
@@ -350,7 +352,7 @@ if (this.jQuery === undefined) {
    * @private
    * Calls the registered onSubmit callback.
    */
-  Form.prototype.notifySubmission = function(error, data) {
+  Form.prototype.notifySubmission = function (error, data) {
     if (this.cb) {
       this.cb(error, data);
     }
@@ -363,7 +365,7 @@ if (this.jQuery === undefined) {
    * @param translation Object - Should contain a map of the fieldName to the
    *  translated display name. ie: {fieldName1: 'Field Name 1', ...}
    */
-  Form.prototype.addTranslation = function(langName, translation) {
+  Form.prototype.addTranslation = function (langName, translation) {
     this.translations[langName] = translation;
   };
 
@@ -373,9 +375,9 @@ if (this.jQuery === undefined) {
    * @param translations Array - Translation objects should be of the following
    * form: {fieldName: 'Field Name Translated'}
    */
-  Form.prototype.addTranslations = function(translations) {
+  Form.prototype.addTranslations = function (translations) {
     var self = this;
-    _.each(translations, function(translation, langName) {
+    _.each(translations, function (translation, langName) {
       self.addTranslation(langName, translation);
     });
   };
@@ -390,10 +392,8 @@ if (this.jQuery === undefined) {
    *    @argument error
    *    @agument data
    */
-  Form.prototype.validate = function(formFields, cb) {
-    var self = this,
-      errors = {},
-      transformedFieldValues = {};
+  Form.prototype.validate = function (formFields, cb) {
+    var self = this, errors = {}, transformedFieldValues = {};
 
     if (!formFields) {
       throw new Error("Field values must be supplied in order to validate.");
@@ -405,9 +405,8 @@ if (this.jQuery === undefined) {
 
     // Restructure the form values so it's easier to check against the rules.
     // ie: {fieldName: [fieldVal, ...], ...}
-    _.each(formFields, function(formField) {
-      var name = formField.name,
-        value = formField.value;
+    _.each(formFields, function (formField) {
+      var name = formField.name, value = formField.value;
 
       if (_.isString(value)) {
         value = value.trim();
@@ -420,7 +419,7 @@ if (this.jQuery === undefined) {
     });
 
     // Check form values against the validation requirements.
-    _.each(self.reqs, function(fieldReqs, fieldName) {
+    _.each(self.reqs, function (fieldReqs, fieldName) {
       var fieldVals, error, displayName, fieldErrors = [],
         translation = self.translations[config.language];
 
@@ -446,9 +445,9 @@ if (this.jQuery === undefined) {
         }
         fieldErrors.push(error);
       } else {
-        _.each(fieldReqs, function(reqVal, reqName) {
+        _.each(fieldReqs, function (reqVal, reqName) {
           if (reqName !== 'name' && Rules.hasOwnProperty(reqName)) {
-            _.each(fieldVals, function(fieldVal) {
+            _.each(fieldVals, function (fieldVal) {
               var testResult = Rules[reqName](fieldVal, fieldReqs, formFields);
               if (!testResult) {
                 if (_.isObject(fieldReqs.error) && fieldReqs.error[reqName]) {
@@ -492,16 +491,12 @@ if (this.jQuery === undefined) {
    * Transforms the user requirements into a data structure that's easier to
    * work with. ie: {fieldName1: [{fieldRequirements}, ...], fieldName2: ...}
    */
-  Form.prototype.transformReqs = function(userRequirements) {
-    var self = this,
-      transformedReqs = {},
-      lang;
+  Form.prototype.transformReqs = function (userRequirements) {
+    var self = this, transformedReqs = {}, lang;
     lang = this.translations[config.language] = {};
 
-    _.each(userRequirements, function(userReq) {
-      var reqName, fieldReq = {},
-        fieldName = userReq.name,
-        reqValue;
+    _.each(userRequirements, function (userReq) {
+      var reqName, fieldReq = {}, fieldName = userReq.name, reqValue;
       for (reqName in userReq) {
         if (userReq.hasOwnProperty(reqName)) {
           reqValue = userReq[reqName];
@@ -533,7 +528,7 @@ if (this.jQuery === undefined) {
       fileInputs = $(formElem).find("input[type=file]"),
       files = [];
 
-    fileInputs.each(function() {
+    fileInputs.each(function () {
       var fileSize, fileType, fieldName = this.name;
 
       if (this.files.length > 0) {
@@ -543,15 +538,10 @@ if (this.jQuery === undefined) {
         fileSize = 0;
         fileType = '';
       }
-      files.push({
-        name: fieldName,
-        value: fileSize,
-        fileType: fileType,
-        files: this.files
-      });
+      files.push({name: fieldName, value: fileSize, fileType: fileType, files: this.files});
     });
 
-    _.each(files, function(fileObj) {
+    _.each(files, function (fileObj) {
       formData.push(fileObj);
     });
 
@@ -565,16 +555,23 @@ if (this.jQuery === undefined) {
    *    @argument error
    *    @agument data
    */
-  Form.prototype.onSubmit = function(cb) {
+  Form.prototype.onSubmit = function (cb) {
     var self = this;
     self.cb = cb;
     self.isBrowser = true;
 
-    $(root.document).on('submit', '#' + self.name, function(e) {
+    var name;
+    if(self.name[0] === '#' ||  self.name[0] === "." ) {
+      name = self.name;
+    }else{ // this line gives backwards compatibility
+      name = "#" + self.name;
+    }
+
+    $(root.document).on('submit', name, function (e) {
       e.preventDefault();
 
       // Clear previous errors
-      _.each(self.errorElems, function(elem) {
+      _.each(self.errorElems, function (elem) {
         $(elem).html('');
       });
 
@@ -590,7 +587,7 @@ if (this.jQuery === undefined) {
    * @param name String - The name of the form to be validated.
    * @param formRules - Array - The required rules for validation.
    */
-  Regulate = function(name, formRules) {
+  Regulate = function (name, formRules) {
     if (Regulate[name]) {
       throw new Error(name + 'is already being validated');
     }
@@ -604,7 +601,7 @@ if (this.jQuery === undefined) {
    * @param testFn Function - The function to be executed during validation.
    *    @return A boolean value that represents the validation result.
    */
-  Regulate.registerRule = function(ruleName, testFn) {
+  Regulate.registerRule = function (ruleName, testFn) {
     if (Rules[ruleName]) {
       throw new Error(ruleName + " is already defined as a rule.");
     }
@@ -618,7 +615,7 @@ if (this.jQuery === undefined) {
    * @param messageFn Function - The function that will generate the error message.
    *    @return A string that will be used as the error message.
    */
-  Regulate.registerMessage = function(ruleName, messageFn) {
+  Regulate.registerMessage = function (ruleName, messageFn) {
     Messages[ruleName] = messageFn;
   };
 
@@ -626,7 +623,7 @@ if (this.jQuery === undefined) {
    * @public
    * Adds the given translation to the i18n languages.
    */
-  Regulate.addTranslation = function(langName, translation) {
+  Regulate.addTranslation = function (langName, translation) {
     Translations[langName] = translation;
   };
 
@@ -634,9 +631,9 @@ if (this.jQuery === undefined) {
    * @public
    * Adds the given translations to the i18n languages.
    */
-  Regulate.addTranslations = function(translations) {
+  Regulate.addTranslations = function (translations) {
     var self = this;
-    _.each(translations, function(translation, langName) {
+    _.each(translations, function (translation, langName) {
       self.addTranslation(langName, translation);
     });
   };
@@ -645,13 +642,13 @@ if (this.jQuery === undefined) {
    * @public
    * Use the corresponding message translations for the requested language.
    */
-  Regulate.useTranslation = function(langName) {
+  Regulate.useTranslation = function (langName) {
     if (!Translations[langName]) {
       throw new Error(langName + ' translation not found.');
     }
     config.language = langName;
     Messages = Translations[langName];
-    _.each(messagesCore, function(msgFn, ruleName) {
+    _.each(messagesCore, function (msgFn, ruleName) {
       Messages[ruleName] = msgFn;
     });
   };

@@ -1,5 +1,5 @@
 Package.describe({
-    summary: "A versatile validation library for the client and server."
+  summary: "A versatile validation library for the client and server."
 });
 
 Package.on_use(function (api) {
